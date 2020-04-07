@@ -11,4 +11,4 @@ These tools need to be installed.
 - Pandoc
 - Python
 - Latex
-- wkhtmltopdf
+- wkhtmltopdf -> replaced with python venv and `pip install pdfkit` which is a python library to use wkhtmltopf. Whats missing now is to figure out how to start page count after page xx

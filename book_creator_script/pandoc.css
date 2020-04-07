@@ -23,8 +23,8 @@ SOFTWARE.
 
 
 body {
-  font-family: Helvetica, arial, sans-serif;
-  font-size: 14px;
+  font-family: Source Sans Pro,Helvetica Neue,Arial,sans-serif;
+  font-size: 15px;
   line-height: 1.6;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -44,6 +44,7 @@ body > *:last-child {
 a {
   color: #4183C4;
   text-decoration: none;
+  font-weight: 600;
 }
 
 a.absent {
@@ -62,12 +63,13 @@ a.anchor {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  margin: 20px 0 10px;
+  margin: 40px 0 0.6rem;
   padding: 0;
   font-weight: bold;
   -webkit-font-smoothing: antialiased;
   cursor: text;
   position: relative;
+  color: #2b3034;
 }
 
 h2:first-child, h1:first-child, h1:first-child + h2, h3:first-child, h4:first-child, h5:first-child, h6:first-child {
@@ -77,6 +79,10 @@ h2:first-child, h1:first-child, h1:first-child + h2, h3:first-child, h4:first-ch
 
 h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
   text-decoration: none;
+}
+
+h1 + p , h2 + p, h3 + p, h4 + p, h5 + p{
+	margin-top: 5px;
 }
 
 h1 tt, h1 code {
@@ -104,35 +110,38 @@ h6 tt, h6 code {
 }
 
 h1 {
-  font-size: 28px;
-  color: black;
+  font-size: 2.75rem;
+
 }
 
 h2 {
-  font-size: 24px;
-  border-bottom: 1px solid #cccccc;
-  color: black;
+  font-size: 1.75rem;
+
 }
 
 h3 {
-  font-size: 18px;
+  font-size: 1.5rem;
 }
 
 h4 {
-  font-size: 16px;
+  font-size: 1.25rem;
 }
 
 h5 {
-  font-size: 14px;
+  font-size: 1rem;
 }
 
 h6 {
   color: #777777;
-  font-size: 14px;
+  font-size: 0.75rem;
 }
 
 p, blockquote, ul, ol, dl, li, table, pre {
   margin: 15px 0;
+}
+
+li{
+	margin: 0;
 }
 
 hr {
@@ -228,6 +237,7 @@ blockquote {
   border-left: 4px solid #dddddd;
   padding: 0 15px;
   color: #777777;
+  margin: 25px 0px;
 }
 
 blockquote > :first-child {
@@ -277,6 +287,8 @@ table tr th :last-child, table tr td :last-child {
 
 img {
   max-width: 100%;
+  display: block;
+  margin: 5px 0px;
 }
 
 span.frame {
@@ -402,6 +414,7 @@ pre {
   overflow: auto;
   padding: 6px 10px;
   border-radius: 3px;
+  margin: 10px 0px;
 }
 
 pre code, pre tt {
@@ -416,3 +429,27 @@ pre code, pre tt {
 @media print {
     .page-break	{ display: block; page-break-after: always; }
 }
+
+
+/* Table of contents */
+#TOC > ul > li > a:first-child{
+	font-size: 20px;
+	font-weight: 600;
+}
+
+#TOC > ul > li ul{
+	margin-top: 0px;
+}
+
+#TOC > ul > li{
+	margin-bottom: 15px;
+}
+
+body {
+   counter-reset:  EQU_COUNT 0 ;
+}
+
+.MathJax_Display:after {
+      content: "      (" counter(EQU_COUNT) ")";    
+      counter-increment: EQU_COUNT;           
+    }
