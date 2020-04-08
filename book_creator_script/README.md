@@ -1,14 +1,18 @@
-# Guide
+# PDF Book from Markdown
+Converts a bunch of markdown files made for a programming book into a pdf.
+Uses prism syntax highlighting and a modified version of github stylesheet.
 
-To create a pdf, epub or whatever out of the markdown files, copy and paste the `create_book.py`, `pandoc.css` and `pagebreak.lua` file in a directory with all the markdown files.
-
-Then run `python create_book.py` which generates a book.pdf out of all markdown files.
-
-#### Requirements
-
-These tools need to be installed.
-
-- Pandoc
+### Requirements:
+You need to install:
+- https://wkhtmltopdf.org/
+- https://pandoc.org/installing.html
+- LaTeX (See https://tug.org/mactex/ on OS X, https://miktex.org/ on Windows, or install the texlive package on Linux.
 - Python
-- Latex
-- wkhtmltopdf -> replaced with python venv and `pip install pdfkit` which is a python library to use wkhtmltopf. Whats missing now is to figure out how to start page count after page xx
+
+### How to use
+1. Install pdfkit `pip install pdfkit`
+2. Place all your files in the root directory
+3. Edit the metadata.yaml file
+4. Make sure they are alphabetically sorted (0-9, then A - z)
+5. Run `python create_book.py`
+6. Enjoy

@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Lars Albert" />
+  <title>Objection.js and Knex.js Guidebook</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="./src/pandoc.css" />
+  <link rel="stylesheet" href="./src/prism.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <script src="./src/prism.js"></script>
+</head>
+<body class="line-numbers"/>
+<header id="title-block-header">
+<h1 class="title">Objection.js and Knex.js Guidebook</h1>
+<p class="author">Lars Albert</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction">0.0 Introduction</a>
+<ul>
+<li><a href="#why-knex.js-and-objection.js">Why Knex.js and Objection.js</a></li>
+<li><a href="#choice-of-sql-database">Choice of SQL database</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#what-you-need">What you need</a></li>
+<li><a href="#the-project">The project</a></li>
+</ul></li>
+<li><a href="#project-setup">0.1 Project Setup</a></li>
+<li><a href="#api-endpoints-setup">0.2 API Endpoints Setup</a>
+<ul>
+<li><a href="#router-class">Router class</a></li>
+<li><a href="#testing-the-endpoints">Testing the endpoints</a></li>
+</ul></li>
+<li><a href="#knex.js-objection.js">1.0 Knex.js &amp; Objection.js</a>
+<ul>
+<li><a href="#getting-started">Getting Started</a></li>
+</ul></li>
+<li><a href="#knex.js-setup">1.1 Knex.js Setup</a></li>
+<li><a href="#knex.js-migrations-tables">1.2 Knex.js migrations (tables)</a>
+<ul>
+<li><a href="#creating-migrations-file">Creating migrations file</a></li>
+<li><a href="#creating-migrations">Creating migrations</a></li>
+</ul></li>
+<li><a href="#knex.js-seeds-initial-values">1.3 Knex.js Seeds (initial values)</a>
+<ul>
+<li><a href="#creating-seed-files">Creating Seed files</a></li>
+<li><a href="#apply-seeds">Apply seeds</a></li>
+<li><a href="#seeds-issue">Seeds issue</a></li>
+</ul></li>
+<li><a href="#knex.js-queries">1.4 Knex.js Queries</a></li>
+<li><a href="#objection.js-setup">2.0 Objection.js Setup</a></li>
+<li><a href="#objection.js-models">2.1 Objection.js Models</a>
+<ul>
+<li><a href="#our-first-model">Our first Model</a></li>
+<li><a href="#restructuring-our-first-model">Restructuring our first Model</a>
+<ul>
+<li><a href="#users-model">1. Users Model</a></li>
+<li><a href="#include-knex.js-and-objection.js-in-our-project">2. Include Knex.js and Objection.js in our project</a></li>
+<li><a href="#update-the-express-routes">3. Update the Express routes</a></li>
+<li><a href="#testing-the-endpoints-1">Testing the endpoints</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#objection.js-queries">2.2 Objection.js Queries</a></li>
+<li><a href="#objection.js-relationships">2.3 Objection.js Relationships</a>
+<ul>
+<li><a href="#relationmappings">relationMappings</a>
+<ul>
+<li><a href="#query-the-relation">Query the relation</a></li>
+<li><a href="#why-use-this-approach">Why use this approach?</a></li>
+<li><a href="#eager-loading">Eager loading</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#objection.js-validation">2.4 Objection.js Validation</a>
+<ul>
+<li><a href="#validate-user-input">Validate user input</a></li>
+<li><a href="#insert-method">insert() method</a></li>
+</ul></li>
+<li><a href="#custom-user-data">3.0 Custom user data</a>
+<ul>
+<li><a href="#testing-with-postman">Testing with Postman</a></li>
+</ul></li>
+<li><a href="#error-handling">3.1 Error handling</a>
+<ul>
+<li><a href="#current-state-of-error-handling">Current state of error handling</a></li>
+<li><a href="#improved-error-handling">Improved error handling</a>
+<ul>
+<li><a href="#testing-the-error-handler">Testing the error handler</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#about">About</a></li>
+<li><a href="#appendix-databases">Appendix: Databases</a>
+<ul>
+<li><a href="#relational-database-comparison">Relational Database comparison</a>
+<ul>
+<li><a href="#sqlite">SQLite</a></li>
+<li><a href="#mysql">MySQL</a></li>
+<li><a href="#postgresql">PostgreSQL</a></li>
+</ul></li>
+<li><a href="#which-to-pick">Which to pick?</a></li>
+</ul></li>
+<li><a href="#pdf-book-from-markdown">PDF Book from Markdown</a>
+<ul>
+<li><a href="#requirements-1">Requirements:</a></li>
+<li><a href="#how-to-use">How to use</a></li>
+</ul></li>
+</ul>
+</nav>
+<div style="page-break-after: always;"></div>
+<h1 id="introduction">0.0 Introduction</h1>
+<p>NodeJS is often associated with the popular NoSQL database MongoDB which is, by default, the most JavaScript friendly database. It uses a JSON similar data storage type (called BSON). NoSQL databases have the advantage that you don’t have to “waste” too much time, defining data structures and possible relationships. Additionally, they are great getting your project quickly production up and running and don’t enforce field constraints.</p>
+<p>When starting a new NodeJS project, however, you shouldn’t just accept MongoDB as the default choice. Instead, the type of database you choose should depend on your project’s requirements. Sometimes you want to use an ACID compliant database. <a href="https://en.wikipedia.org/wiki/ACID">ACID</a>, in short, means that a full database task either succeeds or fails. There are no missing values because some parts of a transaction threw an error. These are some crucial advantages needed by banks and eCommerce websites. The most popular ACID compliant databases are SQL databases.</p>
+<h3 id="why-knex.js-and-objection.js">Why Knex.js and Objection.js</h3>
+<p>Node.js doesn’t provide a simple way out of the box to connect to databases due to its general-purpose nature. Of course, there are packages like <strong>pg</strong> (for PostgreSQL - SQL Database) or <strong>mongoose</strong> (for MongoDB - NoSQL Database) to interact directly to your database, but if your application gets big enough, managing connection and queries through these packages can become a pain quickly.</p>
+<p><strong>Sequelize</strong> is another popular package that creates a connection between NodeJS and a SQL database; however, the code of it is so much abstracted that it doesn’t feel like SQL anymore. Additionally, some people online complain that Sequelize can become an annoyance, and the package is not well documented.</p>
+<p><strong>Knex.js</strong> and <strong>Objection.js</strong> combined are an alternative to many <strong>SQL database</strong> connection and ORM packages (Knex.js and Objection.js are only used with SQL databases). It probably has a steeper learning curve, but many people online swear that after they migrated from Sequelize to Knex.js and Objection.js, they never looked back. Knex.js is the package used to execute database queries. Objection.js is the package used to create a unified representation of a database table with many features, without actually defining the database schema.</p>
+<p>As you’ve already noticed, the choice of using Knex.js and Objection.js for SQL databases here is made based on third party opinions. Still, those opinions should be highlighted to give some hints about the advantages these packages could provide.</p>
+<h3 id="choice-of-sql-database">Choice of SQL database</h3>
+<p>Knex.js, the tool which manages the database (and not Objection.js), supports PostgreSQL, MSSQL, MySQL, MariaDB, SQLite3, Oracle, and Amazon Redshift.</p>
+<p>After I worked some time Knex.js and Objection.js, I would personally recommend using these tools only in combination with PostgreSQL databases. Only PostgreSQL enables all features of Knex.js and Objection.js where other SQL databases have problems.</p>
+<p>For example, when inserting multiple rows, only PostgreSQL can return all of the inserted rows in the same query. Other SQL databases only returns the first inserted row.</p>
+<p>This whole guidebook is based on MySQL simplicity reasons.</p>
+<h3 id="requirements">Requirements</h3>
+<p>For you to continue, you should have a general knowledge of REST APIs, NodeJS, Express, and MySQL.</p>
+<h3 id="what-you-need">What you need</h3>
+<p>Make sure that you have the following tools installed on your computer:</p>
+<ul>
+<li><p><a href="https://nodejs.org/en/">Node.js with NPM</a></p></li>
+<li><p>A MySQL database, I recommend using <a href="https://www.apachefriends.org/download_success.html">XAMPPs MySQL Database</a> (Install the whole program, but we only need the MySQL database of it)</p></li>
+<li><p><a href="https://www.postman.com/downloads/">Postman to test the API</a></p></li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h2 id="the-project">The project</h2>
+<p>We are going to build a todo system with users and todo’s. You should be able to:</p>
+<ul>
+<li><p>request all users from the REST API</p></li>
+<li><p>request all todos from the REST API</p></li>
+<li><p>request specific todos and the related user from the REST API I.e., we have two tables with relationships between them.</p></li>
+<li><p>send a POST request with user input to create a new user</p></li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h1 id="project-setup">0.1 Project Setup</h1>
+<p>We first create a basic REST API using <code>Express</code>, before we start using the database, Knex.js, and Objection.js.</p>
+<h4 id="setup">Setup</h4>
+<h5 id="create-a-project-directory">1. Create a project directory</h5>
+<p>Create a project directory that you will work with</p>
+<h5 id="initialize-the-project">2. Initialize the project</h5>
+<p>Run in your terminal</p>
+<pre><code class="language-shell">npm init -y</code></pre>
+<h5 id="install-express">3. Install express</h5>
+<p>Express is a minimal, open-source, and flexible Node.js web app framework designed to make developing websites, web apps, &amp; API’s much easier.</p>
+<p>Run in your terminal</p>
+<pre><code class="language-shell">npm install express --save</code></pre>
+<h5 id="create-the-nodejs-server-file">4. Create the NodeJS server file</h5>
+<p>Create a file named <code>server.js</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> You can always run the app writing in your terminal <code>node server.js</code>, which starts the server. Alternatively, you can also use the <a href="https://www.npmjs.com/package/nodemon">nodemon (Install guide here)</a> package to auto re-start the server on file change using the <code>nodemon server.js</code> command.</p>
+</blockquote>
+<div style="page-break-after: always;"></div>
+<h1 id="api-endpoints-setup">0.2 API Endpoints Setup</h1>
+<p><strong>Express</strong> is the framework we use to create the API endpoints (called routes) and handle requests &amp; responses.</p>
+<p>There are two ways to create routes in express using the:</p>
+<ul>
+<li><p>route methods -&gt; <code>app.get(...)</code></p></li>
+<li><p>router class -&gt; <code>router.get(...)</code></p></li>
+</ul>
+<p>The difference between them is that the second option is used to make the routes more maintainable in more significant projects.</p>
+<p>Instead of having all routes inside the main NodeJS file, you can categorize and separate them into their own <strong>mini-app</strong>.</p>
+<p>Using the router class, you define in your main NodeJS file some <em>base endpoints</em>, which then is extended in more route files. E.g.</p>
+<ul>
+<li><p><em>www.restaurant.com/food</em> -&gt; everything food-related will be handled by the <code>/routes/food.js</code> file</p></li>
+<li><p><em>www.restaurant.com/order</em> -&gt; everything order-related will be handled by the <code>/routes/order.js</code> file</p></li>
+<li><p><em>www.restaurant.com/reservation</em> -&gt; everything table reservation-related will be handled by the <code>/routes/reservation.js</code> file</p></li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> If you know the Python framework called <em>Django</em>, then you can think of it as splitting up a project in multiple apps. Each route file, in this case, is an app and has its very own functionality.</p>
+</blockquote>
+<p>Let’s have a look at both approaches with hardcoded data.</p>
+<h4 id="example-using-route-methods">Example using route methods</h4>
+<p><strong>/server.js</strong></p>
+<pre><code class="language-js">// Route Methods
+const express = require(&quot;express&quot;);
+const app = express();
+
+// Create endpoint of all users
+app.get(&quot;/api/users/&quot;, (req, res) =&gt; {
+  res.json([
+    {
+      id: 1,
+      name: &quot;Marc&quot;,
+      age: 19
+    },
+    {
+      id: 2,
+      name: &quot;Ben&quot;,
+      age: 31
+    },
+    {
+      id: 3,
+      name: &quot;Jessica&quot;,
+      age: 27
+    }
+  ]);
+});
+
+// Create endpoint of all todos
+// Done status: 0 - false ; 1 - true
+app.get(&quot;/api/todos/&quot;, (req, res) =&gt; {
+  res.json([
+    {
+      id: 1,
+      user_id: 1, // -&gt; Marc
+      todo: &quot;Buy Milk&quot;,
+      done: 0
+    },
+    {
+      id: 2,
+      user_id: 1, // -&gt; Marc
+      todo: &quot;Walk the dog&quot;,
+      done: 0
+    },
+    {
+      id: 3,
+      user_id: 3, // -&gt; Jessica
+      todo: &quot;Call grandma&quot;,
+      done: 0
+    }
+  ]);
+});
+
+// Start the server
+const server = app.listen(8080, error =&gt; {
+  if (error) {
+    console.log(&quot;Error running Express&quot;);
+  }
+  console.log(&quot;Server is running on port&quot;, server.address().port);
+});</code></pre>
+<p>This is the fastest and easy way to create routes.</p>
+<blockquote>
+<p><strong>To return or not return</strong> <code>app.get("/", (req,res) =&gt; { ... })</code> does <strong>not</strong> expect a value to be returned. There’s no difference with using <code>return</code> or not, except using it will add additional overhead. Only use <code>return</code> if you want to stop the functions execution (e.g. nested if else statements.)</p>
+</blockquote>
+<h3 id="router-class">Router class</h3>
+<p>Considering that we, later on, create large and complex web applications, we use the router class.</p>
+<p>For this, we have to create new directories and files. Create the:</p>
+<ul>
+<li><p><strong>/routes/</strong> directory. This directory contains all route files.</p></li>
+<li><p><strong>/routes/api.js</strong> file. This file handles all route files related to the <code>example.com/api/</code> endpoint.</p></li>
+<li><p><strong>/routes/api/</strong> directory. This directory contains all API route related files.</p></li>
+<li><p><strong>/routes/api/users.js</strong> file. This file handles all <code>api/users/</code> endpoints, which could be getting all users or updating a single one.</p></li>
+<li><p><strong>/routes/api/todos.js</strong> file. This file handles all <code>api/todos/</code> endpoints, which could be getting all todos or updating a single one.</p></li>
+</ul>
+<p>After that, we have to update the <em>server.js</em> file and remove the logic from it. The only purpose of this file should be to include the route handlers. <strong>server.js</strong></p>
+<pre><code class="language-js">// Route Class
+const express = require(&quot;express&quot;);
+const app = express();
+
+// Require router files
+const apiRoutes = require(&quot;./routes/api&quot;);
+
+// Include the routes to express
+app.use(&quot;/api&quot;, apiRoutes);
+
+// Start the server
+const server = app.listen(8080, error =&gt; {
+  if (error) {
+    console.log(&quot;Error running Express&quot;);
+  }
+  console.log(&quot;Server is running on port&quot;, server.address().port);
+});</code></pre>
+<p>Next, our <em>/routes/api.js</em> file should, once again, only combine and include the logic of each endpoint, which separates the <em>/routes/api/users.js</em> and <em>/routes/api/todos.js</em> files.</p>
+<p><strong>/routes/api.js</strong></p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const app = express();
+
+// Require router files
+const usersRoutes = require(&quot;./api/users&quot;);
+const todosRoutes = require(&quot;./api/todos&quot;);
+
+// Include the routes to express
+app.use(&quot;/users&quot;, usersRoutes);
+app.use(&quot;/todos&quot;, todosRoutes);
+
+// Export the file to be used in server.js
+module.exports = app;</code></pre>
+<p><strong>/routes/api/users.js</strong></p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const router = express.Router();
+
+// Create endpoint of all users
+router.get(&quot;/&quot;, (req, res) =&gt; {
+  res.json([
+    {
+      id: 1,
+      name: &quot;Marc&quot;,
+      age: 19
+    },
+    {
+      id: 2,
+      name: &quot;Ben&quot;,
+      age: 31
+    },
+    {
+      id: 3,
+      name: &quot;Jessica&quot;,
+      age: 27
+    }
+  ]);
+});
+
+// Export to api.js
+module.exports = router;</code></pre>
+<p><strong>/routes/api/todos.js</strong></p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const router = express.Router();
+
+// Create endpoint of all todos
+router.get(&quot;/&quot;, (req, res) =&gt; {
+  res.json([
+    {
+      id: 1,
+      user_id: 1, // -&gt; Marc
+      todo: &quot;Buy Milk&quot;,
+      done: 0
+    },
+    {
+      id: 2,
+      user_id: 1, // -&gt; Marc
+      todo: &quot;Walk the dog&quot;,
+      done: 0
+    },
+    {
+      id: 3,
+      user_id: 3, // -&gt; Jessica
+      todo: &quot;Call grandma&quot;,
+      done: 0
+    }
+  ]);
+});
+
+// Export to api.js
+module.exports = router;</code></pre>
+<h3 id="testing-the-endpoints">Testing the endpoints</h3>
+<p>If you would now visit the endpoints with Postman, you should see for</p>
+<p><strong>localhost:8080/api/users/</strong> <img src="https://i.imgur.com/wMfXZJn.png" alt="wMfXZJn.png" /></p>
+<p><strong>localhost:8080/api/todos/</strong> <img src="https://i.imgur.com/4Qvuqlw.png" alt="4Qvuqlw.png" /></p>
+<p><strong>Now we should have the underlying REST API setup and are ready to implement the database with Knex.js and Objection.js</strong></p>
+<blockquote>
+<p>This setup is an overkill for this small and only REST API project, but hopefully, it is a good base for future projects.</p>
+</blockquote>
+<div style="page-break-after: always;"></div>
+<h1 id="knex.js-objection.js">1.0 Knex.js &amp; Objection.js</h1>
+<p><strong>Knex.js</strong> is the package that manages the connection between Node.JS and your SQL database. Knex.js provides a set of methods to execute CRUD operations on the database, which means you don’t write actual SQL.</p>
+<p>Additionally to these methods, Knex.js comes with more tools like:</p>
+<ul>
+<li><p><strong>migrations</strong> - makes your life more comfortable managing the tables of your SQL database. Migrations allow us to quickly alter a table after we have already created all the tables.</p></li>
+<li><p><strong>seeds</strong> - helps you to populate the database with initial values. Usually, you’ll need to seed your database to set some pre-defined values or for testing purposes.</p></li>
+</ul>
+<p><strong>Objection.js</strong> is an ORM and built upon Knex.js and allows us to define models for our SQL database. It also comes with build-in validation using a JSON schema you define for each model.</p>
+<h3 id="getting-started">Getting Started</h3>
+<p>A project which implements both packages should always start setting up Knex.js first and then Objection.js. The database should have the tables and some data first before working with Objection.js.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="knex.js-setup">1.1 Knex.js Setup</h1>
+<p>In <em>Chapter 0.0 - Introduction</em>, we mentioned that we would use the MySQL database shipped with XAMPP, but you are not bound to use XAMPP or MySQL altogether. Knex.js supports Postgres, MSSQL, MySQL, MariaDB, SQLite3, Oracle, and Amazon Redshift.</p>
+<h4 id="create-the-database">1. Create the database</h4>
+<p>Before we can use Knex.js, we have to create the database manually. Our database name is going to be <em>node_todo</em>.</p>
+<p>Run the XAMPP app and start the MySQL module. Then connect to your database either using a terminal or phpMyAdmin, which is delivered with the XAMPP installation.</p>
+<p>Connecting using the terminal:</p>
+<pre><code class="language-shell">mysql -u root</code></pre>
+<p><sup>You maybe have a user with a password. Connect accordingly.</sup></p>
+<p>After you connected in the terminal or phpMyAdmin, create a new database.</p>
+<p>Creating a database using the terminal:</p>
+<pre><code class="language-shell">CREATE DATABASE node_todo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</code></pre>
+<h4 id="install-knex.js">2. Install Knex.js</h4>
+<p>Head back to your project and run in your terminal:</p>
+<pre><code class="language-shell">npm install knex --save</code></pre>
+<p><strong>If you haven’t installed knex globally yet, do so.</strong></p>
+<pre><code class="language-shell">npm install knex -g</code></pre>
+<p>The reason behind this is that you want to run <code>knex</code> commands in the terminal too. Installing it globally, you can do so without troubleshooting issues depending on your operating system.</p>
+<h4 id="install-mysql-client">3. Install MySQL client</h4>
+<p>The connection between MySQL and NodeJS is actually made by a different package (called the client). Therefore, we have to install the additional package called <code>mysql</code> for our MySQL database. In your terminal, type:</p>
+<pre><code class="language-shell">npm install --save mysql</code></pre>
+<blockquote>
+<p><strong><code>mysql</code> vs <code>mysql2</code> ?</strong> If you search online, you’ll find that there are two major mysql clients for NodeJS, <code>mysql</code> and <code>mysql2</code>. They are both supported in the same way, so it doesn’t matter which one to use. Many implementations go with <code>mysql</code>.</p>
+</blockquote>
+<h4 id="initialize-knex.js">4. Initialize Knex.js</h4>
+<p>Run in your terminal:</p>
+<pre><code class="language-shell">knex init</code></pre>
+<p>This initializes the project with knex and generates a file named <strong>knexfile.js</strong>, which holds the database connection configurations.</p>
+<h4 id="create-the-database-config-file-and-directory">5. Create the database config file and directory</h4>
+<p>You want to separate the database connection credentials in a project and remove it from a version control system such as <em>git</em>. Only a template of how these credentials are stored should be published online, never the real credentials file.</p>
+<p>Therefore are we going to create a new directory with two files: <strong>/config/db_config.js</strong> - contains the real credentials and should be ignored in .gitignore</p>
+<pre><code class="language-js">module.exports = {
+    host: &quot;127.0.0.1&quot;,
+    database: &quot;node_todo&quot;,
+    user: &quot;root&quot;,
+    password: &quot;&quot;
+};</code></pre>
+<p><strong>/config/db_template.js</strong> - contains the template of how credentials are stored, should be published with the project</p>
+<pre><code class="language-js">module.exports = {
+    host: &quot;127.0.0.1&quot;,
+    database: &quot;my_dev_db&quot;,
+    user: &quot;username&quot;,
+    password: &quot;password&quot;
+};</code></pre>
+<h4 id="configure-knexfile.js">6. Configure knexfile.js</h4>
+<p>If you open the <strong>knexfile.js</strong>, you’ll see that there are many setups to connect to production, development, and staging database. However, we only have the MySQL database, which we use to develop the project locally.</p>
+<p>Therefore, import the <em>/config/db_config.js</em> credentials and configure the development database accordingly.</p>
+<p><strong>knexfile.js</strong></p>
+<pre><code class="language-js">const credentials = require(&#39;./config/db_config.js&#39;);
+
+module.exports = {
+  development: {
+    client: &#39;mysql&#39;,
+    connection: {
+      database:   credentials.database,
+      user:           credentials.user,
+      password:   credentials.password
+    }
+  }
+};</code></pre>
+<p>The client field uses the previously installed <code>mysql</code> package. It is the field that tells Knex.js which third party client it should use to connect to the database. Other databases, like PostgreSQL, need a different client, and you can find the correct packages on Knex.js documentation websites.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="knex.js-migrations-tables">1.2 Knex.js migrations (tables)</h1>
+<p>We’ll use Knex.js <strong>migrations</strong> to create our database tables and to track changes within our database schema. Migrations allow us to easily alter a table after we have already created all the tables.</p>
+<p>We want to create the following tables using Knex.js instead of writing raw SQL. In regular SQL, the code to create the tables would look like the following</p>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS users (
+    id INTEGER AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    age INTEGER,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS todos (
+    id INT AUTO_INCREMENT,
+    todo VARCHAR(255) NOT NULL,
+    done BOOLEAN NOT NULL DEFUALT false,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    PRIMARY KEY(id)
+)  ENGINE = InnoDB;</code></pre>
+<p>Above is a basic schema, covering an OneToMany foreign key relationship in the todos tables (One user can have Many todos).</p>
+<h3 id="creating-migrations-file">Creating migrations file</h3>
+<p>We are going to create two migration files, one to manage the <strong>users</strong> table and another for the <strong>todos</strong> table.</p>
+<p>Create two migration files by executing the following code in your terminal</p>
+<pre><code class="language-shell">knex migrate:make create_tables</code></pre>
+<blockquote>
+<p><strong>Note</strong> Your migration name should be something descriptive, not simply the name of the table(s) that you are creating / modifying. Remember that throughout the lifetime of your app, there may be several migrations that all relate to the same database table. Hence, you want your migration names to inform other developers as to what that migration is doing.</p>
+</blockquote>
+<p>The previous command generates a <strong>/migrations</strong> folder in your project directory with a migration file inside:</p>
+<ul>
+<li><strong>20200331182227_create_tables.js</strong></li>
+</ul>
+<p>Notice the long number in the filename. It is a timestamp of the file creation time. Timestamps are necessary because Knex.js uses the timestamp to know which migrations to run first (This makes sense in a bit).</p>
+<p>Opening the migrations file, you notice that they are almost empty except for a bit of boilerplate code.</p>
+<p>There are two functions defined here</p>
+<pre><code class="language-js">// Executed during a migration
+exports.up = function(knex) {
+  
+};
+
+// Executed during a rollback
+exports.down = function(knex) {
+  
+};</code></pre>
+<p>In the <code>exports.up( )</code> function, we define table names and columns to create in the database during migration. We use the <code>exports.down( )</code> function to specify what changes we want to undo during a rollback (usually used to drop the table).</p>
+<blockquote>
+<p><strong>Note:</strong> It is possible to create for each table one migration file. E.g. <em>20200331182227_create_users.js</em> and <em>20200331182227_create_todos.js</em>. This is also recommended for multiple application projects. Be careful choosing this approach as you <strong>must</strong> first create the users migration file before the todos due to the dependency and the migration order. Read more here: <a href="https://www.reddit.com/r/node/comments/fsdfs3/knexjs_migrations_does_each_table_has_its_own/?utm_source=share&amp;utm_medium=web2x">Knex.js migrations, does each table has its own migration?</a></p>
+</blockquote>
+<h3 id="creating-migrations">Creating migrations</h3>
+<p>Our <code>exports.up( )</code> and <code>exports.down( )</code> functions should always return a promise, therefore is the <code>return</code> keyword necessary. We are going to tackle one after another.</p>
+<h4 id="exports.up">exports.up( )</h4>
+<p>Inside of the <code>exports.down</code> function of your newly created migration file add the following code</p>
+<p><strong>/migrations/20200331182227_create_tables.js</strong></p>
+<pre><code class="language-js">// Executed during a migration
+exports.up = function(knex) {
+  return knex.schema
+    .createTable(&quot;users&quot;, table =&gt; {
+      table.increments(&quot;id&quot;);
+      table.string(&quot;name&quot;).notNullable();
+      table.integer(&quot;age&quot;);
+    })
+    .createTable(&quot;todos&quot;, table =&gt; {
+      table.increments(&quot;id&quot;);
+      table.string(&quot;todo&quot;).notNullable();
+      table.boolean(&quot;done&quot;).defaultTo(false);
+      table.integer(&quot;user_id&quot;)
+        .unsigned()
+        .notNullable();
+
+      // Set the foreign key
+      table.foreign(&quot;user_id&quot;)
+        .references(&quot;id&quot;)
+        .inTable(&quot;users&quot;)
+        .onDelete(&quot;CASCADE&quot;)
+        .onUpdate(&#39;CASCADE&#39;);
+    });
+};
+};</code></pre>
+<p>In the code above:</p>
+<ul>
+<li><p>we create a table with using the <code>.createTable(tableName, callback)</code> method</p></li>
+<li><p>we can chain multiple <code>.createTable(tableName, callback)</code> methods to create an additional table.</p></li>
+<li><p>the callback function takes an argument. Using the argument we can chain field methods to create columns with or without constraints.</p></li>
+<li><p><code>increments("id")</code> is the equivalent to <code>INTEGER AUTO_INCREMENT PRIMARY KEY</code> in SQL</p></li>
+<li><p><code>.notNullable()</code> is the equivalent to <code>NOT NULL</code> in SQL</p></li>
+<li><p><code>.defaultTo(value)</code> is the equivalent to <code>DEFAULT value</code> in SQL</p></li>
+<li><p><code>.unsigned()</code> denies negative numerical values and is needed for foreign keys.</p></li>
+<li><p><code>.foreign("user_id").references("id").inTable("users").onDelete("CASCADE").onUpdate('CASCADE');</code> is the equivalent to <code>FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE</code> in SQL</p></li>
+</ul>
+<p>Documentation:</p>
+<ul>
+<li><p><a href="http://knexjs.org/#Schema">Schema Builder methods - Knex.js</a> e.g. <code>.createTable(tableName, callback)</code></p></li>
+<li><p><a href="https://knexjs.org/#Schema-Building">Schema Builder field methods - Knex.js</a> e.g. <code>.string("name")</code></p></li>
+<li><p><a href="https://knexjs.org/#Chainable">Schema Builder chainable field methods - Knex.js</a> e.g. <code>.notNullable()</code></p></li>
+</ul>
+<h4 id="exports.down">exports.down( )</h4>
+<p>Inside of the <code>exports.down( )</code> function of your newly created migration file add the following code</p>
+<p><strong>/migrations/20200331182227_create_tables.js</strong></p>
+<pre><code class="language-js">// Executed during a rollback
+exports.down = function(knex) {
+  return (
+    knex.schema
+      // Here, delete tables in reverse order because todos depends on users
+      .dropTableIfExists(&quot;todos&quot;)
+      .dropTableIfExists(&quot;users&quot;)
+  );
+};</code></pre>
+<p>In the code above:</p>
+<ul>
+<li>we delete a table with using the <code>.dropTableIfExists(tableName)</code> method, which also can be chained</li>
+</ul>
+<h4 id="run-migrations">Run migrations</h4>
+<p>Lastly, we have to apply the migration files, so that Knex.js creates the tables in our SQL database.</p>
+<p>In your terminal, run</p>
+<pre><code class="language-shell">knex migrate:latest</code></pre>
+<p>You can log in to MySQL CLI or phpMyAdmin and check that the tables, alongside two knex tables, have been created. <img src="https://i.imgur.com/rb68GAs.png" alt="rb68GAs.png" /> Knex.js automatically create the tables <em>knex_migrations</em> and <em>knex_migrations_lock</em>. These tables maintain a running list of which migrations have been implemented. It is best not to touch those two.</p>
+<h4 id="rollback-migrations">Rollback migrations</h4>
+<p>If you ever wish to update the database tables, you either create an additional migrations file that alters the existing table, or you can run a rollback which deletes the tables, then do the required updates inside <code>exports.up( )</code> and <code>exports.down( )</code> functions and run a new migrations to re-create the updated migrations file.</p>
+<p>However, best practice is that you should create a new migration file for each database change.</p>
+<p>In your terminal, run</p>
+<pre><code class="language-shell">knex migrate:rollback</code></pre>
+<p>to rollback a migration.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="knex.js-seeds-initial-values">1.3 Knex.js Seeds (initial values)</h1>
+<p>Seeding means setting the database tables with sample data to get a new development environment up and running. Knex makes it easy to seed a database. We seed our users and todos table with some initial values.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="creating-seed-files">Creating Seed files</h2>
+<p>You can instruct Knex to create new seed scripts using the following command in your terminal</p>
+<pre><code class="language-shell">knex seed:make 001_create_data</code></pre>
+<p>You will see a newly created directory and file <strong>/seeds/001_create_data.js</strong> with a boilerplate.</p>
+<blockquote>
+<p><strong>Note</strong> Unlike migrations, seeds don’t have a timestamp. Your seed name should, therefore, be something descriptive and start with a version number, e.g., <code>001_</code>, <code>002_</code>. Seed files are executed sequentially (one after another) if used with a version number.</p>
+<p>Remember that throughout the lifetime of your app, there may be several seeds that all relate to the same database table, so you want your seeds names to inform other developers the version and action it does.</p>
+</blockquote>
+<p>Lets edit the seed file to our needs <strong>/seeds/001_create_data.js</strong></p>
+<pre><code class="language-js">exports.seed = function(knex) {
+  // Deletes ALL data of todos
+  return knex(&quot;todos&quot;)
+    .del()
+    .then(() =&gt; {
+      //Delete ALL data of users
+      return knex(&quot;users&quot;).del();
+    })
+    .then(() =&gt; {
+      //Inserts new data into users
+      return knex(&quot;users&quot;).insert([
+        {
+          name: &quot;Marc&quot;,
+          age: 19
+        },
+        {
+          name: &quot;Ben&quot;,
+          age: 31
+        },
+        {
+          name: &quot;Jessica&quot;,
+          age: 27
+        }
+      ]);
+    })
+    .then(users =&gt; {
+      /**
+       * We can use the callback of the previous users inserts,
+       * which returns a single item or an array of items (array only available in PostgreSQL), to
+       * insert todos data and establish the relationship with users.
+       */
+      return knex(&quot;todos&quot;).insert([
+        {
+          user_id: 1, //-&gt; Marc
+          // alternatively to the fixed value one, you can also use
+          // user_id: users[0]
+          todo: &quot;Buy Milk&quot;
+        },
+        {
+          user_id: 1, //-&gt; Marc
+          todo: &quot;Walk the dog&quot;
+        },
+        {
+          user_id: 2, //-&gt; Jessica
+          todo: &quot;Call grandma&quot;
+        }
+      ]);
+    });
+};
+</code></pre>
+<p><strong>Explanation:</strong> You notice that the seed file starts by deleting any rows in the database. This is so that we can ensure we’re starting with a clean slate any time we run our seed file.</p>
+<p>Because we are working with users and todos, we need to clear out both tables (todos first, as they depend on users existing).</p>
+<p>Knex.js nature is promise based and expects a callback. The same goes for seeding data to the database. We not only perform one task but multiple ones. Chaining multiple tasks with a <code>.then( ()=&gt;{ ... } )</code> method allows us to perform multiple tasks one after another.</p>
+<p><code>.insert()</code>, <code>.del()</code> and many other Knex.js methods return a callback with a single or multiple items (multiple items, except get queries, are only available in Postgress) which then can be used in the following chained <code>.then()</code> method.</p>
+<p>Documentation: <a href="http://knexjs.org/#Builder-insert">insert, delete, update, … QueryBuilder methods</a></p>
+<div style="page-break-after: always;"></div>
+<h2 id="apply-seeds">Apply seeds</h2>
+<p>To apply the seed data to your database tables, type in your terminal</p>
+<pre><code class="language-shell">knex seed:run</code></pre>
+<div style="page-break-after: always;"></div>
+<h2 id="seeds-issue">Seeds issue</h2>
+<p>Running seeds inserts new rows in the tables. These tables have an <em>auto increment</em> id attribute. Each time new rows are added, the id is increased to a new +1 value.</p>
+<p>The above seed file only works once, when no data has ever been added to the table before!</p>
+<p>Trying to re-run those seeds (i.e., delete all data and re-insert), they will fail because the users ids starts at 4 after we inserted the data the first time. The hard coded users id 1 and 3 in line 38, 44, and 48 do not exist anymore.</p>
+<p>And no, there is no logic build in rollback command as we know it for migrations.</p>
+<p>Two solutions to this issues are shown below.</p>
+<h4 id="solution-a">Solution A:</h4>
+<p>Doing a full reset, which includes: 1. <code>knex migrate:rollback</code> -&gt; delete table 2. <code>knex migrate:latest</code> -&gt; create table</p>
+<p>makes sure that the tables <em>auto increment</em> value for the ids start again at 1.</p>
+<p>Now you could run the seed without issues <strong>one time</strong> again.</p>
+<p>Using this method, you have to redo a full reset every time you want to add new data to tables.</p>
+<h4 id="solution-b">Solution B:</h4>
+<p>If it doesn’t matter to use only one users id for all todos, then you can make use of the callback in line 26, which always returns the id of the first inserted user in the users table.</p>
+<p>Here would then be the updated seeds file: <strong>/seeds/001_create_data.js</strong></p>
+<pre><code class="language-js">exports.seed = function(knex) {
+  // Deletes ALL data of todos
+  return knex(&quot;todos&quot;)
+    .del()
+    .then(() =&gt; {
+      //Delete ALL data of users
+      return knex(&quot;users&quot;).del();
+    })
+    .then(() =&gt; {
+      //Inserts new data into users
+      return knex(&quot;users&quot;).insert([
+        {
+          name: &quot;Marc&quot;,
+          age: 19
+        },
+        {
+          name: &quot;Ben&quot;,
+          age: 31
+        },
+        {
+          name: &quot;Jessica&quot;,
+          age: 27
+        }
+      ]);
+    })
+    .then(users =&gt; {
+      console.log(JSON.stringify(users, null, 4));
+      /**
+       * We can use the callback of the previous users inserts,
+       * which returns a single item or an array of items (array only available in PostgressSQL), to
+       * insert todos data and establish the relationship to users.
+       */
+      return knex(&quot;todos&quot;).insert([
+        {
+          user_id: users[0], //-&gt; Marc
+          todo: &quot;Buy Milk&quot;
+        },
+        {
+          user_id: users[0], //-&gt; Marc
+          todo: &quot;Walk the dog&quot;
+        },
+        {
+          user_id: users[0], //-&gt; Marc
+          todo: &quot;Call grandma&quot;
+        }
+      ]);
+    });
+};</code></pre>
+<p>Because of database system natures, PostgreSQL is the only database which returns <strong>all</strong> inserted items. MySQL and the others can only return the first item.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="knex.js-queries">1.4 Knex.js Queries</h1>
+<p>The database tables are created and have sample data. Now we can have a look at how we to query the database in NodeJS using Knex.js query methods.</p>
+<p>For this exercise, create a <strong>test.js</strong> file in the project’s root folder. We will delete this file later on but use it for now to run some examples.</p>
+<h4 id="get-all-users">Get all users</h4>
+<p>To retrieve all users, put the code below in the <strong>test.js</strong> file</p>
+<pre><code class="language-js">// Include the knex package and config file
+const Knex = require(&quot;knex&quot;);
+const knexFile = require(&quot;./knexfile.js&quot;);
+
+// Make the connection to the database
+const knex = Knex(knexFile.development);
+
+// Run queries
+knex(&quot;todos&quot;)
+  .where(&quot;user_id&quot;, 1)
+  .then(rows =&gt; {
+    for (row of rows) {
+      console.log(row);
+    }
+  })
+  .catch(err =&gt; {
+    console.log(err);
+    throw err;
+  });</code></pre>
+<p>In the code above, we run all queries on the knex method, which takes a single argument, the table name to run the query on. Then by chaining multiple query methods, can we finally handle the returned data using the <code>.then( )</code> method, which takes the query result as a callback from the previous chained methods.</p>
+<p>The variable <code>rows</code> contains now all query results, and we console.log them using a for a loop.</p>
+<p>A full list of available query methods can be found here <a href="http://knexjs.org/#Builder">Query Builder - Knex.js</a></p>
+<div style="page-break-after: always;"></div>
+<h1 id="objection.js-setup">2.0 Objection.js Setup</h1>
+<p>Setting up Objection.js is fairly simple. The only requirement you need is to have <code>knex</code> alongside a database client, like <code>mysql</code> installed and initialized with migrations (and seeds if you want sample data).</p>
+<p>Both requirements have been met by following along <em>Chapter 1</em>.</p>
+<p>What’s left is to install objection. Type in your terminal:</p>
+<pre><code class="language-shell">npm install objection</code></pre>
+<div style="page-break-after: always;"></div>
+<h1 id="objection.js-models">2.1 Objection.js Models</h1>
+<p>The first thing we want to define is our models, which represent the tables in our SQL database.</p>
+<p>You need to understand that Objection.js models are not creating the database table structure as used to with other languages and frameworks. Objection.js only task is to retrieve (called <em>getters</em>) from or update (called <em>setters</em>) to <strong>existing tables</strong>. Database table structures are handled by Knex.js migration files.</p>
+<p>Objection.js provides many getter and setter methods.</p>
+<p>The configuration of Objection.js happens through model classes, and there is no global configuration file (unlike the <em>knexfile.js</em> config file of Knex.js).</p>
+<div style="page-break-after: always;"></div>
+<h2 id="our-first-model">Our first Model</h2>
+<p>We start by creating a working model with the minimum amount of code. Afterward, when we understand the basics, the code will be restructured and separated into their own files like <strong>server.js</strong>, <strong>/models/User.js</strong>, … and so on.</p>
+<p>Reuse the previously created <strong>test.js</strong> and insert the following code:</p>
+<pre><code class="language-js">// 1. Import and initialize Knex.js
+const Knex = require(&quot;knex&quot;);
+const knexFile = require(&quot;./knexfile.js&quot;);
+const knex = Knex(knexFile.development);
+
+// 2. Import Objection.js Model class
+const { Model } = require(&quot;objection&quot;);
+
+// 3. Bind all models to the knex instance
+Model.knex(knex);
+
+// 4. Create the User model class
+class User extends Model {
+  static get tableName() {
+    return &quot;users&quot;;
+  }
+}
+
+// 5. Run the query in async/await
+const getUsers = async () =&gt; {
+  const users = await User.query();
+  console.log(users);
+};
+getUsers();</code></pre>
+<p><strong>Output</strong></p>
+<pre><code class="language-shell">$ node test.js
+[
+  User { id: 1, name: &#39;Marc&#39;, age: 19 },
+  User { id: 2, name: &#39;Ben&#39;, age: 31 },
+  User { id: 3, name: &#39;Jessica&#39;, age: 27 }
+]</code></pre>
+<p><strong>In the above code:</strong> 1. Knex.js is initialized the same way as the <strong>test.js</strong> file of <em>Chapter 1.4 Knex.js Queries</em> 2. The Model class is imported from Objection.js 3. Bind all models to the knex instance 4. Create a minimal working <code>User</code> model class, which extends the <code>Model</code> object. The <code>static get tableName()</code> is one of many Objection.js native <a href="https://vincit.github.io/objection.js/api/model/static-properties.html">static properties</a> and is <strong>required</strong> for a model. <code>tableName()</code> returns the name <code>users</code>: the name of the database table we want our <code>User</code> class to model. This is the property that tells Objection.js during a query what table to query on. I.e., you don’t specify table names during a query as previously seen in <em>Chapter 1.4 Knex.js Queries</em>. 5. Run the query in an async/await (or you could alternatively use <code>.then()</code> functions) because the query returns a promise.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="restructuring-our-first-model">Restructuring our first Model</h2>
+<p>Now that we have the basic understanding of an Objection.js with Knex.js structure, we can split up the code, so it works in our initial project setup of NodeJS with Express.</p>
+<h3 id="users-model">1. Users Model</h3>
+<p>Each database table should have its own model, they should all live in a folder named <code>/models/</code> and the first character should be capital to indicate a class file.</p>
+<p>Let’s create the users model and add some code.</p>
+<p><strong>/models/Users.js</strong></p>
+<pre><code class="language-js">// Include Model
+const { Model } = require(&#39;objection&#39;);
+
+// Step 4 from test.js moved here
+class User extends Model {
+  static get tableName() {
+    return &#39;users&#39;;
+  }
+}
+
+// Export User class
+module.exports = User;</code></pre>
+<h3 id="include-knex.js-and-objection.js-in-our-project">2. Include Knex.js and Objection.js in our project</h3>
+<p><strong>server.js</strong> is our project configuration file but is currently missing Knex.js and Objection.js. Let us change that</p>
+<p><strong>server.js</strong></p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const app = express();
+
+const apiRoutes = require(&quot;./routes/api&quot;);
+
+// Step 1 from test.js moved here
+const Knex = require(&quot;knex&quot;);
+const knexFile = require(&quot;./knexfile.js&quot;);
+const knex = Knex(knexFile.development);
+
+// Step 2 from test.js moved here
+const { Model } = require(&quot;objection&quot;);
+
+// Step 3 from test.js moved here
+Model.knex(knex);
+
+app.use(&quot;/api&quot;, apiRoutes);
+
+const server = app.listen(8080, error =&gt; {
+  if (error) {
+    console.log(&quot;Error running Express&quot;);
+  }
+  console.log(&quot;Server is running on port&quot;, server.address().port);
+});</code></pre>
+<h3 id="update-the-express-routes">3. Update the Express routes</h3>
+<p>Earlier on, the <strong>/routes/api/users.js</strong> file returned hardcoded data. Now that our project is hooked up to Objection.js and Knex.js can we return data directly from our SQL database.</p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const router = express.Router();
+const User = require(&quot;../../models/Users.s&quot;); // Extra: Import the User
+
+router.get(&quot;/&quot;, async (req, res) =&gt; { // Extra: add async to the function
+  
+  // Step 5 from test.js moved here
+  const users = await User.query();
+  res.json(users);
+
+
+  // The old response
+  /* 
+  res.json([
+    {
+      id: 1,
+      name: &quot;Marc&quot;,
+      age: 19
+    },
+    {
+      id: 2,
+      name: &quot;Ben&quot;,
+      age: 31
+    },
+    {
+      id: 3,
+      name: &quot;Jessica&quot;,
+      age: 27
+    }
+  ]);
+*/
+});
+
+module.exports = router;</code></pre>
+<p>Ensure that you import the User model and that the anonymous <code>(req,res) =&gt; { ... }</code> recieves the <code>async</code> keyword.</p>
+<h4 id="todo-model">Todo model</h4>
+<p>So far we have a working project that only returns <em>users</em> using the database. Lets implement <em>todos</em> too, create a new file <strong>/models/Todos.js</strong> and place this code in it</p>
+<pre><code class="language-js">// Import Model class from Objection.js
+const { Model } = require(&quot;objection&quot;);
+
+// Create the Todo model class
+class Todo extends Model {
+  static get tableName() {
+    return &quot;todos&quot;;
+  }
+}
+
+// Export the Todo to be used in routes
+module.exports = Todo;</code></pre>
+<p>The project is configured with Objection.js and Knex.js; therefore the only thing missing is to update the <strong>/routes/api/todos.js</strong> file</p>
+<pre><code class="language-js"></code></pre>
+<h3 id="testing-the-endpoints-1">Testing the endpoints</h3>
+<p>Visiting the <em>users</em> endpoint with Postman, you should see for</p>
+<p><strong>localhost:8080/api/users/</strong> <img src="https://i.imgur.com/wMfXZJn.png" alt="wMfXZJn.png" /></p>
+<p><strong>localhost:8080/api/todos/</strong> <img src="https://i.imgur.com/4Qvuqlw.png" alt="4Qvuqlw.png" /></p>
+<div style="page-break-after: always;"></div>
+<h1 id="objection.js-queries">2.2 Objection.js Queries</h1>
+<p>Looking through <a href="https://vincit.github.io/objection.js/api/query-builder/">Objection.js Query Documentation</a>, it quickly becomes apparent that a large amount of the documented queries are <a href="http://knexjs.org/#Builder">Knex.js Queries</a>.</p>
+<p>The <a href="https://vincit.github.io/objection.js/api/model/static-methods.html#static-query"><code>.query()</code></a> method is used to start a query operation on a model and can be chained with <a href="https://vincit.github.io/objection.js/api/query-builder/find-methods.html">Query Builder</a> methods.</p>
+<p>Using the <strong>/routes/api/users.js</strong> and <strong>/routes/api/todos.js</strong>, we will demonstrate some basic queries.</p>
+<h4 id="todos---get-only-the-todo-and-done-field">Todos - Get only the <code>todo</code> and <code>done</code> field</h4>
+<p>Using <code>.select()</code>, you can specify which fields to return. <code>Model.query()</code> and <code>Model.query().select("*")</code> are always the same, except if the query is done on multiple tables (e.g. for a JOIN).</p>
+<p><strong>/routes/api/todos.js</strong></p>
+<pre><code class="language-js">router.get(&quot;/&quot;, async (req, res) =&gt; {
+  const todos = await Todo.query().select(&quot;todo&quot;,&quot;done&quot;)
+  
+  // Handle if no todos have been found
+  if(!todos.length === 0){
+    return res.status(404).json({message: &quot;No todo found&quot;})
+  }
+  
+  res.json(todos);
+});</code></pre>
+<p><strong>Outputs</strong></p>
+<pre><code class="language-shell">[
+    {
+        &quot;todo&quot;: &quot;Buy Milk&quot;,
+        &quot;done&quot;: 0
+    },
+    {
+        &quot;todo&quot;: &quot;Walk the dog&quot;,
+        &quot;done&quot;: 0
+    },
+    {
+        &quot;todo&quot;: &quot;Call grandma&quot;,
+        &quot;done&quot;: 0
+    }
+]</code></pre>
+<h4 id="users---fetch-user-by-id">Users - Fetch user by id</h4>
+<p>The <code>.findById()</code> method returns a single object. If no item could be found, the query returns <code>undefined</code>.</p>
+<p><strong>/routes/api/users.js</strong></p>
+<pre><code class="language-js">router.get(&quot;/&quot;, async (req, res) =&gt; {
+  const user = await User.query().findById(2); // returns a single user in an object, not in an array
+  res.json(users);
+});</code></pre>
+<p><strong>Outputs</strong></p>
+<pre><code class="language-shell">{
+    &quot;id&quot;: 2,
+    &quot;name&quot;: &quot;Ben&quot;,
+    &quot;age&quot;: 31
+}</code></pre>
+<h4 id="todos---get-all-todos-where-todo-value-is-buy-milk">Todos - Get all todos where todo value is “Buy milk”</h4>
+<p><code>.where( COLUMN , VALUE )</code> allows us to specify a search condition. An empty array is returned if nothing matched the condition . <strong>/routes/api/todos.js</strong></p>
+<pre><code class="language-js">router.get(&quot;/&quot;, async (req, res) =&gt; {
+  const todos = await Todo.query().where(&quot;todo&quot;, &quot;Buy Milk&quot;);
+  
+  // Handle if no todos have been found
+  if(!todos.length === 0){
+    return res.status(404).json({message: &quot;No todo found&quot;})
+  }
+  
+  // If todos exist, return the todo set
+  res.json(todos);
+});</code></pre>
+<p><strong>Outputs</strong></p>
+<pre><code class="language-shell">[
+    {
+        &quot;id&quot;: 1,
+        &quot;todo&quot;: &quot;Buy Milk&quot;,
+        &quot;done&quot;: 0,
+        &quot;user_id&quot;: 1
+    }
+]</code></pre>
+<p>More query examples can be found on Objection.js <a href="https://vincit.github.io/objection.js/guide/query-examples.html#basic-queries">query example page</a> or <a href="https://vincit.github.io/objection.js/api/query-builder/find-methods.html">Query Builder API page</a>.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="objection.js-relationships">2.3 Objection.js Relationships</h1>
+<p>In <em>Chapter 1.2 - Knex.js migrations</em>, we defined an OneToMany relationship between the table <code>users</code> and <code>todos</code> with the help of foreign keys inside <code>todos</code>.</p>
+<p>While these relationships usually are created between the primary key of one table and a foreign key reference of another table, Objection.js has no such limitations. You can create a relationship using any two columns (or any sets of columns). You can even create relations using values nested deep inside JSON columns.</p>
+<p>This is helpful while querying for items from multiple tables (e.g., in a JOIN operation) as we can pre-define relationships and then create non-complex queries using these pre-defined relationships.</p>
+<blockquote>
+<p><strong>Reminder</strong> Our Objection.js models <strong>are not</strong> the ones creating tables. They only <em>get/set</em> data <em>from/to</em> the tables. The following sections have nothing to do with defining and creating the database tables.</p>
+</blockquote>
+<div style="page-break-after: always;"></div>
+<h2 id="relationmappings">relationMappings</h2>
+<p>The <a href="https://vincit.github.io/objection.js/api/model/static-properties.html#static-relationmappings"><code>relationMappings()</code></a> <a href="https://vincit.github.io/objection.js/api/model/static-properties.html">static property</a> defines the relations (relationships, associations) to other models.</p>
+<p>Lets look how we would add <code>relationMappings()</code> to our Todo class in <strong>/models/Todo.js</strong></p>
+<pre><code class="language-js">const { Model } = require(&quot;objection&quot;);
+
+// Import User class model for relationMappings()
+const User = require(&quot;./Users.js&quot;);
+
+class Todo extends Model{
+
+    class Todo extends Model {
+      static get tableName() {
+        return &quot;todos&quot;;
+      }
+      
+    // defines the relations to other models.
+    static get relationMappings() {
+          return {
+              user: {
+                  relation: Model.BelongsToOneRelation,
+                  modelClass: User,
+                  join: {
+                      from: &quot;todos.user_id&quot;,
+                      to: &quot;users.id&quot;
+                  }
+            }
+        };
+    }
+}</code></pre>
+<p>In the syntax above:</p>
+<ul>
+<li><p><code>relationMappings()</code> always returns an object</p></li>
+<li><p>the key <code>user</code> is how we will refer to it to the parent class</p></li>
+<li><p>the key <code>relation</code> has the relationship value <code>Model.BelongsToOneRelation</code> which says that each todo has one user.</p></li>
+<li><p>the key <code>modelClass</code> says that the whole <code>user</code> object comes from the <code>User</code> class</p></li>
+<li><p>the key <code>join</code> specifies the database table and column names to perform a SQL <code>JOIN</code> operation on, in this case, the <code>user_id</code> column in the <code>todos</code> table to the <code>id</code> column in the <code>users</code> table</p></li>
+</ul>
+<h4 id="model.relation_type">Model.RELATION_TYPE</h4>
+<p>There are three RELATION_TYPE to choose from</p>
+<p><strong><code>Model.BelongsToOneRelation</code></strong> The parent class has one relation to another model. Example: The Todo class uses <code>.BelongsToOneRelation</code> because a todo only has one assigned user.</p>
+<p><strong><code>Model.HasManyRelation</code></strong> The parent class has many relations to another model. Example: The User class uses <code>.HasManyRelation</code> because a user can have many todos)</p>
+<p><strong><code>Model.ManyToManyRelation</code></strong> The parent class and another model have many relations with each other. Example: Currently, neither the User or Todo has a <code>ManyToManyRelation</code>, but if it was possible that multiple users could have the same todo task, then we could use the <code>ManyToManyRelation</code>.</p>
+<h3 id="query-the-relation">Query the relation</h3>
+<p>Simply because the relation to users has is defined doesn’t mean that it’s included in the base <code>.query()</code> function. You still need to specify that you want to use it. This is achieved by using the <code>withGraphFetched()</code> function.</p>
+<p>We can see it in action by updating our <strong>/routes/api/todos.js</strong> file</p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const router = express.Router();
+const Todo = require(&quot;../../models/Todos.js&quot;);
+
+// Create endpoint of all todos
+router.get(&quot;/&quot;, async (req, res) =&gt; {
+
+  // Get all todos WITH the assigned user
+  const todos = await Todo.query().withGraphFetched(&quot;user&quot;);
+  res.json(todos);
+});
+
+// Export to api.js
+module.exports = router;</code></pre>
+<p>Here, the text <code>user</code> inside <code>.withGraphFetched</code> refers to our <strong>custom key</strong> in the Todo class <code>relationMappings()</code> and not to the users database table.</p>
+<p><strong>Testing</strong> the updated query in Postman shows <img src="https://i.imgur.com/49hKtTN.png" alt="49hKtTN.png" /></p>
+<h3 id="why-use-this-approach">Why use this approach?</h3>
+<p>You might already have inspected Objection.js and Knex.js documentation and figured out that there is also a <a href="https://vincit.github.io/objection.js/api/query-builder/join-methods.html#join"><code>.join()</code> method</a>, which for our case would look like</p>
+<pre><code class="language-js">// Get all todos WITH the assigned user
+  const todos = await Todo.query()
+    .select(&quot;*&quot;)
+    .rightJoin(&quot;users&quot;, &quot;todos.user_id&quot;, &quot;=&quot;, &quot;users.id&quot;);
+
+  res.json(todos);</code></pre>
+<p>with the SQL equivalent</p>
+<pre><code class="language-sql">SELECT * 
+FROM todos
+RIGHT JOIN users 
+ON todos.user_id = users.id;</code></pre>
+<p>Both approaches are totally valid, but when you create relation mappings to model (using <code>relationMappings()</code>), you don’t have to write joins manually every time you need to query relations. Also, they enable many other objection features, which require information about how row relations goes in DB.</p>
+<h3 id="eager-loading">Eager loading</h3>
+<p>The whole above process is called <strong>eager loading</strong>. Eager loading is the process whereby a query for one type of entity also loads related entities as part of the query.</p>
+<p>For example, when querying todos, eager-load their users. The todos and their users are retrieved in a single query.</p>
+<p>Multiple methods can be used to load relations eagerly: <code>.withGraphFetched()</code> (the one we have just seen) and <code>.withGraphJoined()</code>. The main difference is that <code>.withGraphFetched()</code> uses multiple queries under the hood to fetch the result while <code>.withGraphJoined()</code> uses a single query and joins to fetch the results. Both methods allow you to do different things which we will go through in detail in the examples below and the examples of the <code>.withGraphJoined()</code> method.</p>
+<p>Even though <code>.withGraphJoined()</code> sounds more performant, but that is not always true. 90% of the times you want to use <code>.withGraphFetched()</code>.</p>
+<p><strong>Why tell you this?</strong> You’ll likely find online resources on Objection.js <code>relationMappings()</code> and eager loading where they use the <a href="https://vincit.github.io/objection.js/api/query-builder/eager-methods.html#eager"><code>.eager()</code></a> method. However, this method is deprecated, and you should use <code>.withGraphFetched()</code>.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="objection.js-validation">2.4 Objection.js Validation</h1>
+<p>At this stage, the REST API only returns data from the database and is missing the feature to create or update rows.</p>
+<p>As soon as you handle user input, you have to validate the data. Objection.js has an in-house validator, the <a href="https://vincit.github.io/objection.js/api/model/static-properties.html#static-jsonschema"><code>jsonSchema()</code> method</a>, where you define properties, data types, and additional constraints.</p>
+<p>Lets have a look at our User model with such a validator:</p>
+<p><strong>/models/User.js</strong></p>
+<pre><code class="language-js">const { Model } = require(&quot;objection&quot;);
+
+class User extends Model {
+  static get tableName() {
+    return &quot;users&quot;;
+  }
+
+  // jsonSchema used for input validation. This is not the database schema!
+  static get jsonSchema(){
+    return {
+      type: &#39;object&#39;,
+      required : [&#39;name&#39;],
+
+      properties:{
+        id: {type:&#39;integer&#39;},
+        name: {type: &#39;string&#39;, minLength:1, maxLength:255},
+        age: {type: &quot;number&quot;} //optional
+      }
+    }
+  }
+}
+
+module.exports = User;</code></pre>
+<p>In the code above:</p>
+<ul>
+<li><p><code>jsonSchema()</code> returns always an object with a key/value pair of <code>type:'object'</code> This is a default to Objection.js.</p></li>
+<li><p>they key <code>required</code> accepts an array of key names that must have a value. A <code>required</code> key name needs to exist inside the <code>properties</code> key</p></li>
+<li><p><code>name</code> and <code>age</code> key names have no direct link to the database columns but should have the same name as the column name.</p></li>
+<li><p>the key <code>properties</code> is used to specify key names and their respective data type (and constraints).</p></li>
+<li><p><code>type</code> reflects what data type you expect to receive. Some basic types are <code>string</code>, <code>number</code>, <code>integer</code>, <code>boolean</code>, … The difference between <code>number</code> and <code>integer</code> is that <code>34</code> and <code>1.82</code> satisfy <code>number</code>, but only <code>34</code> satisfies <code>integer</code>. A more detailed reference can be found <a href="https://json-schema.org/understanding-json-schema/reference/index.html">here (JSON Schema type Reference)</a>.</p></li>
+<li><p><code>minLength</code> and <code>maxLength</code> are data type-specific constraints and are self-explaining.</p></li>
+<li><p><code>age</code> is not part of the required key and the key <code>type</code> is only used if a value exists</p></li>
+</ul>
+<p><code>jsonSchema()</code> uses the third party tool <a href="https://json-schema.org/">JSON Schema</a> for validation - so you have to use that one for reference.</p>
+<h3 id="validate-user-input">Validate user input</h3>
+<p>The validator is ready, so let’s insert some data and see what happens.</p>
+<p>First, we use static data. Later on, will we use data received from a <code>POST</code> request. Let’s update our users route</p>
+<p><strong>/routes/api/users.js</strong></p>
+<pre><code class="language-js">const router = express.Router();
+
+const User = require(&quot;../../models/Users&quot;);
+
+// get all users
+router.get(&quot;/&quot;, async (req, res) =&gt; {
+  const users = await User.query();
+  res.json(users);
+});
+
+// Create new user using a POST request
+router.post(&quot;/&quot;, async (req, res) =&gt; {
+
+    // wrap in try/catch
+    try {
+        const user = await User.query().insert({ name: &quot;Kim&quot;, age: 28 });
+        res.json(user);
+    } catch (err) {
+        // VERY basic error handler, look in Error handling chapter for better solution
+        res.status(400).json(err.data);
+    }
+});
+
+// Export to api.js
+module.exports = router;</code></pre>
+<p>In the code above:</p>
+<ul>
+<li><p>wrap the insert method in a try/catch to handle validation.</p></li>
+<li><p><code>insert()</code> is the method used to insert data. We’re going to talk about the method in detail below.</p></li>
+<li><p><code>catch(err)</code> catch if validation or insert errors occur and send an HTTP status 400 Bad Request back. Look in <em>Chapter 3.1 - Error handling</em> how errors should be dealt with.</p></li>
+</ul>
+<p><strong>Testing with Postman</strong> Visiting <strong>localhost:8080/api/users/</strong> with a POST request displays <img src="https://i.imgur.com/KsFPa3C.png" alt="KsFPa3C.png" /></p>
+<p>A failed validation (E.g., using a number for name - <code>name: 33</code>) would have looked like this <img src="https://i.imgur.com/fPPo7ng.png" alt="fPPo7ng.png" /></p>
+<h3 id="insert-method">insert() method</h3>
+<p>Using the <code>insert</code> method, the inserted data is validated against the <code>jsonSchema</code> method. The promise throws an error if the validation fails. You can either use <code>try/catch</code> or <code>.then().catch</code>.</p>
+<p>The <code>insert</code> method accepts both <em>objects</em> and <em>arrays</em> (batch insert - for multiple items) <strong>. Still, arrays are only supported if you use a PostgreSQL database</strong> because it is the only database system that returns <strong>all</strong> inserted rows. Sounds familiar? We have already seen the same issue in <em>Chapter 1.3 - Knex.js Seeds</em>.</p>
+<p><strong>Workaround for MySQL and other non-PostgreSQL databases</strong> We have done batch inserts in <em>Chapter 1.3 - Knex.js Seeds</em> using plain Knex.js without Objection.js. Using <code>Model.knexQuery()</code> instead of <code>Model.query()</code> allows us to run queries directly through Knex.js (and not Objection.js models). Even with <code>knexQuery</code> there is still only one item returned with multiple inserts.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="custom-user-data">3.0 Custom user data</h1>
+<p>The REST API is ready to accept incoming POST requests with user input. The user will most probably send data in JSON format. Express accepts JSON, but it needs first to be configured to do so.</p>
+<p>Updating our <strong>server.js</strong></p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const app = express();
+
+// Accept JSON data
+app.use(express.urlencoded({ extended: false })); // -&gt; add this
+app.use(express.json()); // -&gt; add this
+
+const apiRoutes = require(&quot;./routes/api&quot;);
+
+const Knex = require(&quot;knex&quot;);
+const knexFile = require(&quot;./knexfile.js&quot;);
+const knex = Knex(knexFile.development);
+
+const { Model } = require(&quot;objection&quot;);
+
+Model.knex(knex);
+
+app.use(&quot;/api&quot;, apiRoutes);
+
+const server = app.listen(8080, error =&gt; {
+  if (error) {
+    console.log(&quot;Error running Express&quot;);
+  }
+  console.log(&quot;Server is running on port&quot;, server.address().port);
+});</code></pre>
+<p>By adding <code>app.use(express.urlencoded({ extended: false }));</code> and <code>app.use(express.json());</code>, express is now able to accept POST data in JSON format.</p>
+<p>By editing the routes files like below, our user endpoint is ready to accept incoming JSON data.</p>
+<p><strong>/routes/api/users.js</strong></p>
+<pre><code class="language-js">const router = express.Router();
+
+const User = require(&quot;../../models/Users&quot;);
+
+// get all users
+router.get(&quot;/&quot;, async (req, res) =&gt; {
+  const users = await User.query();
+  res.json(users);
+});
+
+// Create new user using a POST request
+router.post(&quot;/&quot;, async (req, res) =&gt; {
+      // req.body contains the JSON
+    const {name, age} = req.body; // destructure name and age out of the sent JSON
+
+    try {
+        const user = await User.query().insert({ name, age }); //instead of name:name, can we use name once. This assigns a key with the name of the variable to the value of the variable.
+        res.json(user);
+    } catch (err) {
+        res.status(400).json(err.data);
+    }
+});
+
+module.exports = router;</code></pre>
+<p>FYI: The app will not fail if no age is provided.</p>
+<h3 id="testing-with-postman">Testing with Postman</h3>
+<p>In Postman, you can send JSON data by visiting the <em>Body</em> tab (point 1 in below image) and clicking on JSON (point 2 in below image). Make sure to format your data as actual JSON by using quotation marks (point 3 in below image) !</p>
+<p><img src="https://i.imgur.com/EwvgrKZ.png" alt="EwvgrKZ.png" /> In the above image, you can see in the body response that the project returns the inserted user with the user id</p>
+<div style="page-break-after: always;"></div>
+<h1 id="error-handling">3.1 Error handling</h1>
+<p>Error handling is an essential function of our project and is up to us to deal with it. Neither is Objection.js or Knex.js handling any errors.</p>
+<h3 id="current-state-of-error-handling">Current state of error handling</h3>
+<p>We have seen in <em>Chapter 2.4 - Validation</em> that currently, we handle errors on a case level using a try/catch block. And honestly, we don’t handle any errors here; we simply respond with the error message to the REST API.</p>
+<p>Example: <strong>/routes/api/users.js</strong></p>
+<pre><code class="language-js">// ...
+
+// Create new user
+router.post(&quot;/&quot;, async (req, res) =&gt; {
+    const {name, age} = req.body;
+    try {
+        const user = await User.query().insert({ name, age }); 
+        res.json(user);
+    } catch (err) {
+        res.status(400).json(err.data);
+    }
+});
+
+// ...</code></pre>
+<p>The way we currently handle errors is not optimized for a larger project.</p>
+<p><strong>First of all</strong>, how can we guarantee that we always use the same schema of returned errors? By way of an example, for the users route, <em>developer A</em> responds with the full <code>err.data</code> object to the API (just like in our code above). However, for the todos route, developer B feels that the response needs additional details and wraps the data in an object, like below</p>
+<pre><code class="language-js">return res.status(400).json({status: &quot;false&quot;, data: err.data});</code></pre>
+<p>Having no unified error response confuses the API user. There are no properties he/she can rely on to handle responses correctly.</p>
+<p><strong>Second</strong>, if you have a large project, how do you make sure that it runs properly and interfere when a significant error happen? You need a way to access errors that might be with logging each error in log files or using one of many monitoring products like <a href="https://www.npmjs.com/package/pm2">PM2</a> or <a href="https://sentry.io/welcome/">Sentry</a>. Right now, our project only displays the error to the API-user, and we have no way of accessing them.</p>
+<p><strong>Finally</strong>, handling errors and returning a response for every try/catch and if/else statement becomes very tedious and makes the codebase messy.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="improved-error-handling">Improved error handling</h2>
+<p>The solution is to move error handling to a distinct error handling function, and this applies for every Express.js project, not only with Knex.js and Objection.js. A unified and consistent error structure is guaranteed with a distinct function.</p>
+<blockquote>
+<p><strong>Note</strong> But you should never send the errors directly to the client as they may contain SQL and other information that reveals too much about the inner workings of your app.</p>
+</blockquote>
+<p>Objection.js provides a set of case-specific errors. Some are:</p>
+<ul>
+<li><p><code>ValidationError</code> - thrown if validation of any input fails. By input, we mean any data that can come from the outside world, like model instances (using <em>jsonSchema()</em>). Returns an HTTP 400 - Bad Request</p></li>
+<li><p><code>NotFoundError</code> - has to be invoked manually. Best suited during a get/find query when nothing was found, then you can do <code>throw new NotFoundError(emptyResult)</code> to invoke this error. Returns a HTTP 404 Not found</p></li>
+<li><p><code>DBError</code> - thrown if the database client, in our case <code>mysql</code>, throws an error</p></li>
+</ul>
+<p>Objection.js documentation page provides an <a href="https://vincit.github.io/objection.js/recipes/error-handling.html">error handler function</a> specifically made for Objection.js. We are about to implement and use a better, slightly modified version of it in our project.</p>
+<p>We haven’t used, nor created any helper functions yet (which error handlers are a part of). Therefore, we have to create a new folder called <strong>/helpers</strong> with the <strong>error.js</strong> file and import the following code</p>
+<p><strong>/helpers/error.js</strong></p>
+<pre><code class="language-js">/**
+ * Custom Objection.js error handler
+ */
+
+// Import all Error types
+const {
+  ValidationError,
+  NotFoundError,
+  DBError,
+  ConstraintViolationError,
+  UniqueViolationError,
+  NotNullViolationError,
+  ForeignKeyViolationError,
+  CheckViolationError,
+  DataError
+} = require(&quot;objection&quot;);
+
+// Our custom Error Handler
+// err and res are arguments coming from Express.js
+function errorHandler(err, res) {
+  // Handle Error with type ValidationError -&gt; User input data was false
+  if (err instanceof ValidationError) {
+    switch (err.type) {
+      case &quot;ModelValidation&quot;:
+        res.status(400).send({
+          message: err.message,
+          type: err.type,
+          data: err.data
+        });
+        break;
+      case &quot;RelationExpression&quot;:
+        res.status(400).send({
+          message: err.message,
+          type: &quot;RelationExpression&quot;,
+          data: {}
+        });
+        break;
+      case &quot;UnallowedRelation&quot;:
+        res.status(400).send({
+          message: err.message,
+          type: err.type,
+          data: {}
+        });
+        break;
+      case &quot;InvalidGraph&quot;:
+        res.status(400).send({
+          message: err.message,
+          type: err.type,
+          data: {}
+        });
+        break;
+      default:
+        res.status(400).send({
+          message: err.message,
+          type: &quot;UnknownValidationError&quot;,
+          data: {}
+        });
+        break;
+    }
+  } else if (err instanceof NotFoundError) {
+    // Handle Error with type NotFoundError -&gt; manually invoked using &quot;throw new NotFoundError&quot;
+    res.status(404).send({
+      message: err.message,
+      type: &quot;NotFound&quot;,
+      data: {}
+    });
+  } else if (err instanceof UniqueViolationError) {
+    // Handle Error with type UniqueViolationError -&gt; database threw a constraint error
+    res.status(409).send({
+      message: err.message,
+      type: &quot;UniqueViolation&quot;,
+      data: {
+        columns: err.columns,
+        table: err.table,
+        constraint: err.constraint
+      }
+    });
+  } else if (err instanceof NotNullViolationError) {
+    // Handle Error with type NotNullViolationError -&gt; database threw a constraint error
+    res.status(400).send({
+      message: err.message,
+      type: &quot;NotNullViolation&quot;,
+      data: {
+        column: err.column,
+        table: err.table
+      }
+    });
+  } else if (err instanceof ForeignKeyViolationError) {
+    // Handle Error with type ForeignKeyViolationError -&gt; database threw a constraint error
+    res.status(409).send({
+      message: err.message,
+      type: &quot;ForeignKeyViolation&quot;,
+      data: {
+        table: err.table,
+        constraint: err.constraint
+      }
+    });
+  } else if (err instanceof CheckViolationError) {
+    // Handle Error with type ForeignKeyViolationError -&gt; database threw a check constraint error; not available for MySQL
+    res.status(400).send({
+      message: err.message,
+      type: &quot;CheckViolation&quot;,
+      data: {
+        table: err.table,
+        constraint: err.constraint
+      }
+    });
+  } else if (err instanceof DataError) {
+    // Handle Error with type DataError -&gt; database threw a invalid data error
+    res.status(400).send({
+      message: err.message,
+      type: &quot;InvalidData&quot;,
+      data: {}
+    });
+  } else if (err instanceof DBError) {
+    // Handle Error with type DBError -&gt; database threw an error too broad to handle specifically
+    res.status(500).send({
+      //   message: err.message, // -&gt; modified: It could be possible that the err contains sensitive data
+      message: &quot;Unknown Error&quot;,
+      type: &quot;UnknownDatabaseError&quot;,
+      data: {}
+    });
+  } else {
+    // Handle every other error generally
+    res.status(500).send({
+      //   message: err.message, // -&gt; modified: It could be possible that the err contains sensitive data
+      message: &quot;Unknown Error&quot;,
+      type: &quot;UnknownError&quot;,
+      data: {}
+    });
+  }
+}
+
+module.exports = {
+  errorHandler
+};</code></pre>
+<p>In the code above, we check for every possible Objection.js error type, set the response status accordingly (e.g., 404 when no data was found during a find query) and return the message, the error type, and additional data (if possible/ required).</p>
+<blockquote>
+<p><strong>Note</strong> Our errorHandler function is another middleware, just like Knex.js, Objection.js. Even Express.js is a kind of middleware. Middlewares are often used in the context of Express.js framework and are a fundamental concept for Node.js. In a nutshell, it’s a function that has access to the request, response, and error objects of your application and does additional stuff on them.</p>
+</blockquote>
+<p>Next step is to include our newly written errorHandler middleware to our project. For this, we have to update our <strong>server.js</strong> file</p>
+<pre><code class="language-js">const express = require(&quot;express&quot;);
+const app = express();
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+const apiRoutes = require(&quot;./routes/api&quot;);
+
+const Knex = require(&quot;knex&quot;);
+const knexFile = require(&quot;./knexfile.js&quot;);
+const knex = Knex(knexFile.development);
+
+const { Model } = require(&quot;objection&quot;);
+
+Model.knex(knex);
+
+app.use(&quot;/api&quot;, apiRoutes);
+
+// Include error handlers - must be the last one among other middleware or routes to function properly
+const { errorHandler } = require(&quot;./helpers/error.js&quot;);
+app.use((err, req, res, next) =&gt; {
+  errorHandler(err, res);
+});
+
+const server = app.listen(8080, error =&gt; {
+  if (error) {
+    console.log(&quot;Error running Express&quot;);
+  }
+  console.log(&quot;Server is running on port&quot;, server.address().port);
+});</code></pre>
+<p>The error-handling middleware in line 22 must be the last among other middleware and routes for it to function correctly.</p>
+<blockquote>
+<p><strong>Note</strong> Error-handling middleware always takes <strong>four</strong> arguments. You must provide four arguments to identify it as an error-handling middleware function. Even if you don’t need to use the next object, you must specify it to maintain the signature. Otherwise, the next object will be interpreted as regular middleware and will fail to handle errors. Look below for an explanation of <code>next</code></p>
+</blockquote>
+<h4 id="use-error-handler">Use error handler</h4>
+<p>Now that we created and included our error handling middleware, we are ready to handle errors correctly</p>
+<p><strong>/routes/api/users.js</strong></p>
+<pre><code class="language-js">// Create endpoint of all users
+router.get(&quot;/&quot;, async (req, res, next) =&gt; {
+  try {
+    const users = await User.query();
+    // throw a not found error
+    if (!users.length === 0) {
+      throw new NotFoundError(users);
+    }
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post(&quot;/&quot;, async (req, res, next) =&gt; {
+  const { name, age } = req.body;
+
+  try {
+    const user = await User.query().insert({ name, age });
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Export to api.js
+module.exports = router;</code></pre>
+<p>In the code above:</p>
+<ul>
+<li><p>inside the <code>app.get</code>, we have added an if statement, which checks if our database query returns rows. If no rows are returned, we do a <code>throw new NotFoundError(users);</code>. Throwing an error inside a try block invokes the catch block.</p></li>
+<li><p><code>next</code> is an Express.js native function and means to continue to the next matching route and pass our <code>err</code> to our error handling middleware (<code>errorHandler</code> function). <a href="https://expressjs.com/en/guide/using-middleware.html">More information on the next function can be found here</a></p></li>
+<li><p>inside the <code>app.post</code>, we don’t do any custom <code>res.status(400).json(err.data);</code> but let our errorHandler function catch the error type and send a response accordingly.</p></li>
+</ul>
+<h3 id="testing-the-error-handler">Testing the error handler</h3>
+<p><strong>Example validation error</strong> We can invoke a <em>validation error</em> inside the <code>app.post</code> by simply sending an integer as the name value (without quotation marks). <img src="https://i.imgur.com/WBroKRC.png" alt="WBroKRC.png" /> In the above image, we can see the returned error from our error handler function.</p>
+<p><strong>Example nothing found error</strong> We can invoke a <em>not found error</em> by slightly modifying our <code>app.get</code> block not to return any rows.</p>
+<pre><code class="language-js">// Create endpoint of all users
+router.get(&quot;/&quot;, async (req, res, next) =&gt; {
+  try {
+    const users = await User.query().where(&quot;name&quot;,&quot;Penguin Giraf&quot;);
+    // throw a not found error
+    if (!users.length === 0) {
+      throw new NotFoundError(users);
+    }
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+});</code></pre>
+<p>We are definitely sure that no name “Penguin Giraf” exists in the database, i.e. the query returns an empty array.</p>
+<p>Requesting the URL in Postman displays the error message below <img src="https://i.imgur.com/6RuFKrR.png" alt="6RuFKrR.png" /></p>
+<p>Now our project as an improved and unified error handling, honoring a particular structure.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="about">About</h1>
+<p>This booklet is based on:</p>
+<ul>
+<li><p><a href="https://vincit.github.io/objection.js">Objection.js</a></p></li>
+<li><p><a href="http://knexjs.org/">Knex.js - A SQL Query Builder for Javascript</a></p></li>
+<li><p><a href="https://devhints.io/knex">Knex cheatsheet</a></p></li>
+<li><p><a href="https://dev.to/aligoren/building-and-running-sql-queries-with-knex-js-55d4">Building and Running SQL Queries with Knex.js - DEV</a></p></li>
+<li><p><a href="https://dev.to/mrscx/a-definitive-guide-to-sql-in-nodejs-with-objection-js-knex-part-1-4c2e">A definitive guide to SQL in NodeJS with Objection.js + Knex — Part 1 - DEV</a></p></li>
+<li><p><a href="https://itnext.io/express-knex-objection-painless-api-with-db-74512c484f0c">Express + Knex + Objection = Painless API with DB - ITNEXT</a></p></li>
+<li><p><a href="http://zetcode.com/javascript/knex/">Knex.js tutorial - programming databases with Knex.js</a></p></li>
+<li><p><a href="http://perkframework.com/v1/guides/database-migrations-knex.html">Database Migrations with Knex</a></p></li>
+<li><p><a href="https://frontend.turing.io/lessons/module-4/knex-postgres.html">Express with Knex - Front-End Engineering Curriculum - Turing School of Software and Design</a></p></li>
+<li><p><a href="https://www.amazon.com/JavaScript-Frameworks-Modern-Web-Development-ebook/dp/B07ZVLKV2T">JavaScript Frameworks for Modern Web Development: The Essential Frameworks, Libraries, and Tools to Learn Right Now</a></p></li>
+<li><p><a href="https://medium.com/velotio-perspectives/a-step-towards-simplified-querying-in-nodejs-8bfd9bb4097f">A Step Towards Simplified Querying in NodeJS - Velotio Perspectives - Medium</a></p></li>
+<li><p><a href="https://hackernoon.com/objection-knex-painless-postgresql-in-your-node-app-6c21e2703ac6">Hacker Noon</a></p></li>
+<li><p><a href="https://www.youtube.com/watch?v=RyQ1MTVjYK8">YouTube</a> <a href="https://dev.to/nedsoft/central-error-handling-in-express-3aej">Central Error Handling in Express - DEV Community</a> <a href="https://stackoverflow.com/questions/10695629/what-is-the-parameter-next-used-for-in-express">node.js - What is the parameter “next” used for in Express? - Stack Overflow</a> <a href="https://github.com/Vincit/objection.js/issues/874">Throw notFoundError by default · Issue #874 · Vincit/objection.js · GitHub</a> <a href="https://dev.to/nedsoft/central-error-handling-in-express-3aej">Central Error Handling in Express</a></p></li>
+</ul>
+<div style="page-break-after: always;"></div>
+<h1 id="appendix-databases">Appendix: Databases</h1>
+<p>Knex.Js officially supports the following databases:</p>
+<ul>
+<li><p>PostgreSQL</p></li>
+<li><p>MariaDB</p></li>
+<li><p>MySQL</p></li>
+<li><p>Oracle</p></li>
+<li><p>SQLite</p></li>
+<li><p>Amazon Redshift</p></li>
+</ul>
+<p>Here, we are comparing MySQL/MariaDB (they are nearly the same), SQLite, and PostgreSQL.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="relational-database-comparison">Relational Database comparison</h2>
+<h3 id="sqlite">SQLite</h3>
+<p>The SQLite project’s website describes it as a “serverless” database. This means that any process that accesses the database are reads and writes directly to the disk file, without the need for a database engine, compared to MySQL and PostgreSQL. This simplifies SQLite’s setup process, since it eliminates any need to configure a server process. Likewise, there’s no configuration necessary for programs that will use the SQLite database: all they need is access to the disk. This serverless architecture enables the database to be cross-platform compatible. SQLite is used for Android &amp; iOS Mobile phones but also for McAfee antivirus programs, Skype program for Mac OSX and Windows, Firefox…</p>
+<h5 id="advantages">Advantages</h5>
+<p>SQLite is a good choice for low-to-medium traffic websites (~100k requests a day) due to its small footprint (600kb of space), user setup friendly, and portability.</p>
+<h5 id="disadvantages">Disadvantages</h5>
+<p>Although multiple processes can <strong>access</strong> and <strong>query</strong> an SQLite database at the same time, only one process can make <strong>changes</strong> to the database at any given time. This puts SQLite at a disadvantage to MySQL and PostgreSQL when working with lots of data or high write volumes.</p>
+<h3 id="mysql">MySQL</h3>
+<p>MySQL has been the most popular open-source RDBMS for websites in the past years, which powers many of the world’s largest websites and applications, including Twitter, Facebook, Netflix, and Spotify. Getting started with MySQL is relatively straightforward, thanks in large part to its exhaustive documentation and a large community of developers, as well as the abundance of MySQL-related resources online.</p>
+<p>MySQL was designed for speed and reliability at the expense of fully complying with the SQL standards. The MySQL developers continually work towards closer adherence to standard SQL, but it still lags behind other SQL implementations.</p>
+<p>In 2008, <em>Sun Microsystems</em> acquired MySQL. 2 years later, MariaDB, a fork (a copy) of MySQL emerged because developers were not happy with the for-profit policy of <em>Sun Microsystems</em>. Both continue to work the same way. <em>Opinionated statement: MariaDB can be seen as the real “2008 MySQL” successor.</em></p>
+<h5 id="advantages-1">Advantages</h5>
+<p>MySQL is a good choice for all kind of websites due to its popularity and ease of use, improved security (compared to SQLite), speed (by choosing not to implement certain SQL features) and the ability of database replication which is the practice of sharing information across two or more hosts (multiple databases on multiple computers) to help improve reliability, availability, and fault-tolerance</p>
+<h5 id="disadvantages-1">Disadvantages</h5>
+<p>MySQL, however, is known with certain SQL limitations, such as lacking support for <code>FULL JOIN</code> clauses. Also, if your application has lots of users writing data to it at once, another RDBMS like PostgreSQL might be a better choice of database (e.g., a chat application if it needs to be an SQL database).</p>
+<h3 id="postgresql">PostgreSQL</h3>
+<p>PostgreSQL, also known as Postgres, bills itself as “the most advanced open-source relational database in the world.” It was created to be highly extensible and SQL standards-compliant.</p>
+<p>Postgres is capable of efficiently handling multiple tasks at the same time, a characteristic known as concurrency, <strong>but</strong> don’t let this blind you as if PostgreSQL is more performant than MySQL (have a look at advantages/disadvantages). It achieves this without reading locks thanks to its implementation of Multiversion Concurrency Control (MVCC), which ensures the atomicity, consistency, isolation, and durability of its transactions, also known as ACID compliance (FYI: SQLite and MySQL are also ACID compliant).</p>
+<h5 id="advantages-2">Advantages</h5>
+<p>PostgreSQL is a good choice for all kinds of websites for the same reasons as MySQL but additionally handles multi-user environments much better and has built-in support for JSON and Array data types.</p>
+<h5 id="disadvantages-2">Disadvantages</h5>
+<p>When compared to MySQL, PostgreSQL is more power-hungry, as it takes up 10MB RAM for each client connection. This model can take up much memory as concurrent client connection goes when compared to the thread-per-connection model of MySQL. Another big disadvantage can be seen during frequent UPDATEs, where due to no support for clustered indexes, PostgreSQL can have a huge adverse impact on performance compared to MySQL databases.</p>
+<div style="page-break-after: always;"></div>
+<h2 id="which-to-pick">Which to pick?</h2>
+<p>Thanks to Knex.Js query methods, we don’t have to think that much about database-specific syntaxes. We can switch between SQL databases in no time without having to rewrite code.</p>
+<p><strong>But</strong> the database behind a web application matters. SQLite should be used for single-user websites. Later on, when you have to build production-ready websites with multiple functionalities and users, then you should switch to MySQL or PostgreSQL.</p>
+<p>MySQL and PostgreSQL are both excellent choices, and you should pick the one you’re most comfortable with and used to. Many online platforms discuss which is better - but both are performant, one over the other depending on the operation.</p>
+<p>Personally, if you are new to databases, go with MySQL since it’s very versatile and beginner-friendly. If you’ve used MySQL before and have the time and want to use all features of Knex.js and Objection.js, then get started with PostgreSQL to get some additional relational database experience.</p>
+<div style="page-break-after: always;"></div>
+<h1 id="pdf-book-from-markdown">PDF Book from Markdown</h1>
+<p>Converts a bunch of markdown files made for a programming book into a pdf. Uses prism syntax highlighting and a modified version of github stylesheet.</p>
+<h3 id="requirements-1">Requirements:</h3>
+<p>You need to install:</p>
+<ul>
+<li><p>https://wkhtmltopdf.org/</p></li>
+<li><p>https://pandoc.org/installing.html</p></li>
+<li><p>LaTeX (See https://tug.org/mactex/ on OS X, https://miktex.org/ on Windows, or install the texlive package on Linux.</p></li>
+<li><p>Python</p></li>
+</ul>
+<h3 id="how-to-use">How to use</h3>
+<ol type="1">
+<li>Install pdfkit <code>pip install pdfkit</code></li>
+<li>Place all your files in the root directory</li>
+<li>Edit the metadata.yaml file</li>
+<li>Make sure they are alphabetically sorted (0-9, then A - z)</li>
+<li>Run <code>python create_book.py</code></li>
+<li>Enjoy</li>
+</ol>
+</body>
+</html>

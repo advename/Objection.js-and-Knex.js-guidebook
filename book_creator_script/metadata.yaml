@@ -1,5 +1,23 @@
 
 ---
-title: Objection.js
+title: Objection.js and Knex.js Guidebook
+author: Lars Albert
+rights: MIT License
+lang: en-US
+tags: [Objection, Knex, Node, Express]
+abstract: |
+  A guidebook explaining how to use Objection.js and Knex.js together in a project with NodeJS and Express.js
+mainfont: Source Sans Pro
 
-...
+# Filter preferences:
+# - pandoc-crossref
+linkReferences: true
+
+# Change syntax highlighting theme
+output: 
+  pdf_document:
+    pandoc_args: "--highlight=breezedark"
+    
+header-includes: <script src="./src/prism.js"></script>
+    
+---

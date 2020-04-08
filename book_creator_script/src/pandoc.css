@@ -445,11 +445,17 @@ pre code, pre tt {
 	margin-bottom: 15px;
 }
 
-body {
-   counter-reset:  EQU_COUNT 0 ;
+thead {
+    display: table-row-group;
 }
-
-.MathJax_Display:after {
-      content: "      (" counter(EQU_COUNT) ")";    
-      counter-increment: EQU_COUNT;           
-    }
+tr {
+    page-break-before: always;
+    page-break-after: always;
+    page-break-inside: avoid;
+}
+table {
+    word-wrap: break-word;
+}
+table td {
+    word-break: break-all;
+}

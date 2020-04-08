@@ -2,6 +2,9 @@ import os
 from os.path import isfile, join
 from os import listdir
 import subprocess
+import re
+
+src_folder = "./src"
 
 book_name_md = "book.md"
 book_name_html = "book.html"
@@ -42,15 +45,24 @@ markdown_text = "\n".join(markdown_text_array)
 book_markdown = open(book_name_md, 'wb')
 book_markdown.write(markdown_text.encode("utf8"))
 book_markdown.close()
-# Run create
-if os.path.exists(book_name_pdf):
-    os.remove(book_name_pdf)
 
 # --lua-filter=pagebreak.lua is needed to use page breaks
 # -f commonmark is needed to correctly convert lists
-command = f"pandoc {book_name_md} -s -o {book_name_html} --css=pandoc.css -t html5 --lua-filter=pagebreak.lua metadata.yaml --table-of-contents"
+command = f"pandoc {book_name_md} -s -o {book_name_html} --css={src_folder}/pandoc.css -t html5 --lua-filter={src_folder}/pagebreak.lua metadata.yaml --table-of-contents --lua-filter={src_folder}/syntax_code_fix.lua --css={src_folder}/prism.css "
 process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 output, error = process.communicate()
+
+# Edit html to work with prism
+with open(book_name_html, 'r', encoding="utf8") as file:
+    html_text = file.read()
+html_text = html_text.replace(
+    "<body>", '<body class="line-numbers"/>')  # add line number
+wr = open(book_name_html, 'w', encoding="utf8")
+wr.write(html_text)
+
+# Remove pdf if already exists
+if os.path.exists(book_name_pdf):
+    os.remove(book_name_pdf)
 
 import pdfkit
 options = {
@@ -70,7 +82,6 @@ options = {
     'header-line': '',
     'header-font-name': 'Source Sans Pro,Helvetica Neue,Arial,sans-serif',
     'footer-font-name': 'Source Sans Pro,Helvetica Neue,Arial,sans-serif',
-    'book': '',
 }
 
 pdfkit.from_file(book_name_html, book_name_pdf, options=options)
